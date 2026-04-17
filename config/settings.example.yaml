@@ -1,0 +1,42 @@
+# D365 F&O Batch Job Monitoring Agent - Configuration
+# Copy this file to settings.yaml and fill in your values.
+
+# Azure AD / Entra ID authentication
+azure_ad:
+  tenant_id: "your-tenant-id"
+  client_id: "your-client-id"
+  client_secret: "your-client-secret"
+
+# D365 Finance & Operations environment
+d365:
+  base_url: "https://your-environment.operations.dynamics.com"
+  # OData endpoint for batch job data
+  batch_job_entity: "BatchJobs"
+  batch_job_history_entity: "BatchJobHistory"
+
+# Monitoring schedule (cron expression — default: daily at 7:00 AM)
+schedule:
+  cron: "0 7 * * *"
+  timezone: "UTC"
+
+# Notification settings
+notifications:
+  # Microsoft Teams webhook
+  teams:
+    enabled: false
+    webhook_url: "https://outlook.office.com/webhook/your-webhook-url"
+
+  # Email via SMTP
+  email:
+    enabled: false
+    smtp_host: "smtp.office365.com"
+    smtp_port: 587
+    sender: "monitoring@yourcompany.com"
+    password: ""
+    recipients:
+      - "admin@yourcompany.com"
+
+# Logging
+logging:
+  level: "INFO"
+  file: "logs/batch_monitor.log"

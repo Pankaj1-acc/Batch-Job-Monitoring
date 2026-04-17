@@ -1,0 +1,4 @@
+# D365 F&O Batch Job Monitoring Agent
+requests>=2.31.0,<3
+PyYAML>=6.0.1,<7
+APScheduler>=3.10.4,<4
