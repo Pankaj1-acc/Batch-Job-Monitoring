@@ -1,0 +1,58 @@
+name: D365 F&O Batch Job Monitor
+
+on:
+  # Run every day at 06:00 UTC
+  schedule:
+    - cron: "0 6 * * *"
+
+  # Allow manual trigger from GitHub UI
+  workflow_dispatch:
+
+jobs:
+  monitor:
+    name: Run batch job monitor
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run D365 F&O Batch Job Monitor
+        env:
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          D365_URL: ${{ secrets.D365_URL }}
+          D365_RESOURCE: ${{ secrets.D365_RESOURCE }}
+          ALERT_STATUSES: ${{ vars.ALERT_STATUSES }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ vars.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          ALERT_SENDER: ${{ vars.ALERT_SENDER }}
+          ALERT_RECIPIENTS: ${{ secrets.ALERT_RECIPIENTS }}
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+        run: python main.py
+        # Exit code 1 means alerts were found; we still want the step to show
+        # as a warning rather than a hard failure so the workflow summary
+        # is always visible.  Change `continue-on-error` to false if you
+        # prefer the job to fail when alerts are detected.
+        continue-on-error: true
+
+      - name: Upload monitoring log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: monitoring-log-${{ github.run_id }}
+          path: "*.log"
+          if-no-files-found: ignore
